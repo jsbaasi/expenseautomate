@@ -4,7 +4,6 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 import os
 from datetime import date, datetime
-
 from tkcalendar import Calendar
 
 
@@ -71,18 +70,53 @@ class App:
 
     def Receipts(self):
         self.clearMainframe()
-
+        _pageNumber = 0
+        _totalPages = len(self.listOfReceiptPaths)
         ####
         # Create widgets
         ####
         Receipts = ttk.Frame(self.mainframe, width=600, height=600)
 
-        for r in self.listOfReceiptPaths:
-            pass
-        pass
+        # List of images and a single label to display all of them
+        dictOfReceiptImages = {}
+
+        for index, rpath in enumerate(self.listOfReceiptPaths):
+            dictOfReceiptImages[index] = PhotoImage(file=rpath)
+
+        imageLabel = ttk.Label(Receipts, image=dictOfReceiptImages[0])
+
+        # Next button
+        def nextPageFunction():
+            nonlocal _pageNumber
+            if _pageNumber >= (_totalPages - 1):
+                return  # Page is the last
+            _pageNumber += 1
+            imageLabel["image"] = dictOfReceiptImages[_pageNumber]
+
+        nextButton = ttk.Button(Receipts, text="Next", command=nextPageFunction)
+
+        # Previous button
+        def previousPageFunction():
+            nonlocal _pageNumber
+            if _pageNumber <= 0:
+                return  # page is the first
+            _pageNumber -= 1
+            imageLabel["image"] = dictOfReceiptImages[_pageNumber]
+
+        previousButton = ttk.Button(
+            Receipts, text="Previous", command=previousPageFunction
+        )
+
+        ####
+        # Grid all the widgets
+        ####
+        Receipts.grid()
+        imageLabel.grid(column=0, row=0, columnspan=2, rowspan=2)
+        previousButton.grid(column=0, row=1)
+        nextButton.grid(column=1, row=1)
 
     @staticmethod
-    def getListOfReceiptPaths() -> list:
+    def getListOfReceiptPaths() -> list:  # TODO Assumes there's images in the dir
         receiptDirectory = filedialog.askdirectory()
         fileList = os.listdir(receiptDirectory)
         listOfReceiptPaths = []
