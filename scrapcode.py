@@ -1,9 +1,9 @@
-# dictofdict = {}
-# dictofdict["example"] = {"price": "hello", "date": "yello"}
-# dictofdict["example2222"] = {"price": "hello", "date": "yello"}
-# # print(dictofdict)
-# for dict in dictofdict:
-#     print(dict, dictofdict[dict])
+dictofdict = {}
+dictofdict["example"] = {"price": "hello", "date": "yello"}
+dictofdict["example2222"] = {"price": "hello", "date": "yello"}
+# print(dictofdict)
+for dict in dictofdict:
+    print(type(dict))
 
 from datetime import date, timedelta
 
@@ -25,21 +25,6 @@ from datetime import date, timedelta
 #     for dict in dictofdict:
 #         print(dict, dictofdict[dict], file=f)
 
-{
-    "E:\\Coding\\expenseautomate\\example1.png": {
-        "date": datetime.date(2024, 11, 21),
-        "receiptTotal": 1,
-        "mealType": 0,
-    },
-    "E:\\Coding\\expenseautomate\\example2.png": {
-        "date": datetime.date(2024, 11, 21),
-        "receiptTotal": 1,
-        "mealType": 0,
-    },
-    "E:\\Coding\\expenseautomate\\example3.png": {
-        "date": datetime.date(2024, 11, 21),
-        "receiptTotal": 1,
-        "mealType": 0,
-    },
-    "E:\\Coding\\expenseautomate\\example4.png": {},
-}
+# from pathlib import path
+
+# myfile = "E:\Coding\expenseautomate\example1.png"

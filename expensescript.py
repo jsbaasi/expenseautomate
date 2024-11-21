@@ -7,6 +7,7 @@ from datetime import date, datetime, timedelta
 from tkcalendar import Calendar
 from enum import Enum
 from typing import TypedDict
+from pathlib import Path
 
 
 class App:
@@ -198,7 +199,7 @@ class App:
             self.writeExpenseReport(
                 self.generateExpenseReport(self.receiptsInformation, self.receiptDates)
             )
-            # self.renameReceiptPictures(self.listOfReceiptPaths)
+            self.renameReceiptPictures(self.receiptsInformation)
             self.root.destroy()
 
         confirmButton = ttk.Button(
@@ -220,11 +221,6 @@ class App:
         goBackButton.grid(row=1, column=0)
         confirmButton.grid(row=1, column=1)
 
-    # @staticmethod
-    # def convertStrDateToDate(dateString) -> date:
-    #     dateParts = dateString[0].split("-")
-    #     return date(int(dateParts[0]), int(dateParts[1]), int(dateParts[2]))
-
     @staticmethod
     def generateExpenseReport(
         receiptsInfo: dict[str, ReceiptsInfoAttributes], receiptDates: list["date"]
@@ -233,7 +229,6 @@ class App:
             eachDate: {"breakfastTotal": 0, "dinnerTotal": 0}
             for eachDate in receiptDates
         }
-        print(receiptsInfo)
 
         for eachReceiptInfo in receiptsInfo:
             if receiptsInfo[eachReceiptInfo]["mealType"] == 0:  # Breakfast
@@ -254,10 +249,14 @@ class App:
                 print(f"{eachDict}, {finalReport[eachDict]}", file=f)
 
     @staticmethod
-    def renameReceiptPictures(
-        listOfReceiptPaths: list, receiptsInfo: dict[str, ReceiptsInfoAttributes]
-    ) -> None:
-        pass
+    def renameReceiptPictures(receiptsInfo: dict[str, ReceiptsInfoAttributes]) -> None:
+        for eachReceiptPath in receiptsInfo:
+            p = Path(eachReceiptPath)
+            p.rename(
+                p.with_stem(
+                    f"{receiptsInfo[eachReceiptPath]['date']}_£{receiptsInfo[eachReceiptPath]['receiptTotal']}"
+                )
+            )
 
     @staticmethod
     def getListOfReceiptPaths() -> list:  # TODO Assumes there's images in the dir
