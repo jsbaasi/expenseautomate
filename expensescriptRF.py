@@ -5,12 +5,17 @@ from PIL import Image, ImageTk
 import os
 from datetime import date, datetime
 from tkcalendar import Calendar
+from enum import Enum
 
 
 class App:
+    class MealType(Enum):
+        BREAKFAST = 0
+        DINNER = 1
+
     def __init__(self, root) -> None:
         self.root: "Tk" = root
-        self.root.title("Expense Helper")
+        self.root.title("Expense Automate")
 
         # self.style = ttk.Style()
         # self.style.configure(
@@ -70,8 +75,10 @@ class App:
 
     def Receipts(self):
         self.clearMainframe()
+        self.finalReport = {receiptPath: {} for receiptPath in self.listOfReceiptPaths}
         _pageNumber = 0
         _totalPages = len(self.listOfReceiptPaths)
+
         ####
         # Create widgets
         ####
@@ -79,11 +86,32 @@ class App:
 
         # List of images and a single label to display all of them
         dictOfReceiptImages = {}
-
         for index, rpath in enumerate(self.listOfReceiptPaths):
             dictOfReceiptImages[index] = PhotoImage(file=rpath)
-
         imageLabel = ttk.Label(Receipts, image=dictOfReceiptImages[0])
+
+        # Listbox for dates
+        datesVar = StringVar(value=[str(x) for x in self.receiptDates])
+        datesListbox = Listbox(Receipts, listvariable=datesVar)
+
+        # Radio button for meal type
+        mealTypeVar = IntVar()
+        breakfastRadioButton = ttk.Radiobutton(
+            Receipts,
+            text="Breakfast",
+            variable=mealTypeVar,
+            value=App.MealType.BREAKFAST.value,
+        )
+        dinnerRadioButton = ttk.Radiobutton(
+            Receipts,
+            text="Dinner",
+            variable=mealTypeVar,
+            value=App.MealType.DINNER.value,
+        )
+
+        # Entry for receipt total
+        receiptTotalVar = StringVar()
+        receiptTotalEntry = ttk.Entry(Receipts, textvariable=receiptTotalVar)
 
         # Next button
         def nextPageFunction():
@@ -92,6 +120,11 @@ class App:
                 return  # Page is the last
             _pageNumber += 1
             imageLabel["image"] = dictOfReceiptImages[_pageNumber]
+            self.finalReport[self.listOfReceiptPaths[_pageNumber]] = {
+                "date": datesListbox.curselection(),
+                "receiptTotal": receiptTotalEntry.get(),
+                "mealType": mealTypeVar.get(),
+            }
 
         nextButton = ttk.Button(Receipts, text="Next", command=nextPageFunction)
 
@@ -111,9 +144,13 @@ class App:
         # Grid all the widgets
         ####
         Receipts.grid()
-        imageLabel.grid(column=0, row=0, columnspan=2, rowspan=2)
-        previousButton.grid(column=0, row=1)
-        nextButton.grid(column=1, row=1)
+        imageLabel.grid(column=0, row=0, columnspan=4)
+        breakfastRadioButton.grid(column=0, row=1)
+        dinnerRadioButton.grid(column=1, row=1)
+        datesListbox.grid(column=2, row=1)
+        receiptTotalEntry.grid(column=3, row=1)
+        previousButton.grid(column=0, row=2)
+        nextButton.grid(column=3, row=2)
 
     @staticmethod
     def getListOfReceiptPaths() -> list:  # TODO Assumes there's images in the dir
