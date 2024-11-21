@@ -64,16 +64,20 @@ class App:
         calenderStartFinishDates: list["date"] = []
 
         def calenderNextSelectionFunction():
-            if len(self.receiptDates) == 0:
+            if len(calenderStartFinishDates) == 0:
                 calenderStartFinishDates.append(calender.selection_get())
                 expenseLabelText.set("Pick the final date of expenses")
 
-            elif len(self.receiptDates) == 1:
+            elif len(calenderStartFinishDates) == 1:
                 calenderStartFinishDates.append(calender.selection_get())
                 self.receiptDates = [
                     calenderStartFinishDates[0] + timedelta(days=x)
                     for x in range(
-                        (calenderStartFinishDates[1] - calenderStartFinishDates[0]).days
+                        (
+                            calenderStartFinishDates[1]
+                            + timedelta(days=1)
+                            - calenderStartFinishDates[0]
+                        ).days
                     )
                 ]
                 self.Receipts()
@@ -184,7 +188,7 @@ class App:
         )
 
         def confirmButtonFunction() -> None:
-            self.generateExpenseReport(self.receiptsInformation)
+            self.generateExpenseReport(self.receiptsInformation, self.receiptDates)
             self.renameReceiptPictures(self.listOfReceiptPaths)
             self.root.destroy()
 
@@ -205,16 +209,34 @@ class App:
 
     @staticmethod
     def convertStrDateToDate(dateString) -> date:
-        dateParts = dateString.split("-")
+        dateParts = dateString[0].split("-")
         return date(int(dateParts[0]), int(dateParts[1]), int(dateParts[2]))
 
     @staticmethod
-    def generateExpenseReport(receiptsInfo: dict[str, ReceiptsInfoAttributes]) -> None:
-        finalReport: dict[str, App.FinalReportAttributes] = {}
+    def generateExpenseReport(
+        receiptsInfo: dict[str, ReceiptsInfoAttributes], receiptDates: list["date"]
+    ) -> dict["date", FinalReportAttributes]:
+        finalReport: dict["date", App.FinalReportAttributes] = {
+            eachDate: {} for eachDate in receiptDates
+        }
 
-        for receiptInfo in receiptsInfo:
+        for eachReceiptInfo in receiptsInfo:
+            if receiptsInfo[eachReceiptInfo]["mealType"] == 0:  # Breakfast
+                finalReport[receiptsInfo[eachReceiptInfo]["date"]][
+                    "breakfastTotal"
+                ] += receiptsInfo[eachReceiptInfo]["receiptTotal"]
+            else:  # Dinner
+                finalReport[receiptsInfo[eachReceiptInfo]["date"]][
+                    "dinnerTotal"
+                ] += receiptsInfo[eachReceiptInfo]["receiptTotal"]
 
-            pass
+        return finalReport
+
+    @staticmethod
+    def writeExpenseReport(finalReport: dict["date", FinalReportAttributes]) -> None:
+        with open("report.txt", "w") as f:
+            for eachDict in finalReport:
+                print(f"{eachDict}, {finalReport[eachDict]}", file=f)
 
     @staticmethod
     def renameReceiptPictures(
