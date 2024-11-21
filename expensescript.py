@@ -3,15 +3,25 @@ from tkinter import filedialog
 from tkinter import ttk
 from PIL import Image, ImageTk
 import os
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from tkcalendar import Calendar
 from enum import Enum
+from typing import TypedDict
 
 
 class App:
     class MealType(Enum):
         BREAKFAST = 0
         DINNER = 1
+
+    class ReceiptsInfoAttributes(TypedDict):
+        date: "date"
+        receiptTotal: int
+        mealType: int
+
+    class FinalReportAttributes(TypedDict):
+        breakfastTotal: int
+        dinnerTotal: int
 
     def __init__(self, root) -> None:
         self.root: "Tk" = root
@@ -25,13 +35,13 @@ class App:
         self.mainframe = ttk.Frame(self.root, width=600, height=600, padding=50)
         self.mainframe.grid()
 
+        self.root.update_idletasks()  # If this isn't done, Receipts' Entry widget is not focussed lol
         self.listOfReceiptPaths = self.getListOfReceiptPaths()
         self.SelectDates()
 
     def SelectDates(self) -> None:
         self.clearMainframe()
-
-        self.receiptDates = []
+        self.receiptDates: list["date"] = []
 
         ####
         # Create widgets
@@ -51,14 +61,21 @@ class App:
         expenseLabelText.set("Pick the starting date of expenses")
 
         expenseLabel = ttk.Label(SelectDates, textvariable=expenseLabelText)
+        calenderStartFinishDates: list["date"] = []
 
         def calenderNextSelectionFunction():
             if len(self.receiptDates) == 0:
-                self.receiptDates.append(calender.selection_get())
+                calenderStartFinishDates.append(calender.selection_get())
                 expenseLabelText.set("Pick the final date of expenses")
 
             elif len(self.receiptDates) == 1:
-                self.receiptDates.append(calender.selection_get())
+                calenderStartFinishDates.append(calender.selection_get())
+                self.receiptDates = [
+                    calenderStartFinishDates[0] + timedelta(days=x)
+                    for x in range(
+                        (calenderStartFinishDates[1] - calenderStartFinishDates[0]).days
+                    )
+                ]
                 self.Receipts()
 
         calenderNextSelection = ttk.Button(
@@ -75,7 +92,9 @@ class App:
 
     def Receipts(self):
         self.clearMainframe()
-        self.finalReport = {receiptPath: {} for receiptPath in self.listOfReceiptPaths}
+        self.receiptsInformation: dict[str, App.ReceiptsInfoAttributes] = {
+            receiptPath: {} for receiptPath in self.listOfReceiptPaths
+        }
         _pageNumber = 0
         _totalPages = len(self.listOfReceiptPaths)
 
@@ -108,7 +127,6 @@ class App:
             variable=mealTypeVar,
             value=App.MealType.DINNER.value,
         )
-
         # Entry for receipt total
         receiptTotalVar = StringVar()
         receiptTotalEntry = ttk.Entry(Receipts, textvariable=receiptTotalVar)
@@ -120,9 +138,9 @@ class App:
                 return  # Page is the last
             _pageNumber += 1
             imageLabel["image"] = dictOfReceiptImages[_pageNumber]
-            self.finalReport[self.listOfReceiptPaths[_pageNumber]] = {
-                "date": datesListbox.curselection(),
-                "receiptTotal": receiptTotalEntry.get(),
+            self.receiptsInformation[self.listOfReceiptPaths[_pageNumber]] = {
+                "date": self.convertStrDateToDate(datesListbox.curselection()),
+                "receiptTotal": int(receiptTotalEntry.get()),
                 "mealType": mealTypeVar.get(),
             }
 
@@ -151,6 +169,58 @@ class App:
         receiptTotalEntry.grid(column=3, row=1)
         previousButton.grid(column=0, row=2)
         nextButton.grid(column=3, row=2)
+
+    def Confirmation(self):
+        self.clearMainframe()
+
+        ####
+        # Create widgets
+        ####
+        Confirmation = ttk.Frame(self.mainframe)
+
+        confirmationLabel = ttk.Label(
+            Confirmation,
+            text="Confirm the entered details are correct. This will generate an expenses report along with renaming the receipt pictures to reflect their receipt total",
+        )
+
+        def confirmButtonFunction() -> None:
+            self.generateExpenseReport(self.receiptsInformation)
+            self.renameReceiptPictures(self.listOfReceiptPaths)
+            self.root.destroy()
+
+        confirmButton = ttk.Button(
+            Confirmation, text="Confirm", command=confirmButtonFunction
+        )
+
+        def goBackButtonFunction() -> None:
+            self.Receipts()
+
+        goBackButton = ttk.Button(
+            Confirmation, text="Go back", command=goBackButtonFunction
+        )
+
+        ####
+        # Grid all the widgets
+        ####
+
+    @staticmethod
+    def convertStrDateToDate(dateString) -> date:
+        dateParts = dateString.split("-")
+        return date(int(dateParts[0]), int(dateParts[1]), int(dateParts[2]))
+
+    @staticmethod
+    def generateExpenseReport(receiptsInfo: dict[str, ReceiptsInfoAttributes]) -> None:
+        finalReport: dict[str, App.FinalReportAttributes] = {}
+
+        for receiptInfo in receiptsInfo:
+
+            pass
+
+    @staticmethod
+    def renameReceiptPictures(
+        listOfReceiptPaths: list, receiptsInfo: dict[str, ReceiptsInfoAttributes]
+    ) -> None:
+        pass
 
     @staticmethod
     def getListOfReceiptPaths() -> list:  # TODO Assumes there's images in the dir
