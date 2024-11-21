@@ -21,6 +21,15 @@ from datetime import date, timedelta
 #     [sdate + timedelta(days=x) for x in range((edate + timedelta(days=1) - sdate).days)]
 # )
 
-with open("report.txt", "w") as f:
-    for dict in dictofdict:
-        print(dict, dictofdict[dict], file=f)
+# with open("report.txt", "w") as f:
+#     for dict in dictofdict:
+#         print(dict, dictofdict[dict], file=f)
+
+{
+    "D:\\Coding\\expensescript\\example1.png": {},
+    "D:\\Coding\\expensescript\\example2.png": {
+        "date": datetime.date(2024, 11, 21),
+        "receiptTotal": 44,
+        "mealType": 0,
+    },
+}

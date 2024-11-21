@@ -105,50 +105,52 @@ class App:
         ####
         # Create widgets
         ####
-        Receipts = ttk.Frame(self.mainframe, width=600, height=600)
+        ReceiptsFrame = ttk.Frame(self.mainframe, width=600, height=600)
 
         # List of images and a single label to display all of them
         dictOfReceiptImages = {}
         for index, rpath in enumerate(self.listOfReceiptPaths):
             dictOfReceiptImages[index] = PhotoImage(file=rpath)
-        imageLabel = ttk.Label(Receipts, image=dictOfReceiptImages[0])
+        imageLabel = ttk.Label(ReceiptsFrame, image=dictOfReceiptImages[0])
 
         # Listbox for dates
         datesVar = StringVar(value=[str(x) for x in self.receiptDates])
-        datesListbox = Listbox(Receipts, listvariable=datesVar)
+        datesListbox = Listbox(ReceiptsFrame, listvariable=datesVar)
 
         # Radio button for meal type
         mealTypeVar = IntVar()
         breakfastRadioButton = ttk.Radiobutton(
-            Receipts,
+            ReceiptsFrame,
             text="Breakfast",
             variable=mealTypeVar,
             value=App.MealType.BREAKFAST.value,
         )
         dinnerRadioButton = ttk.Radiobutton(
-            Receipts,
+            ReceiptsFrame,
             text="Dinner",
             variable=mealTypeVar,
             value=App.MealType.DINNER.value,
         )
         # Entry for receipt total
         receiptTotalVar = StringVar()
-        receiptTotalEntry = ttk.Entry(Receipts, textvariable=receiptTotalVar)
+        receiptTotalEntry = ttk.Entry(ReceiptsFrame, textvariable=receiptTotalVar)
 
+        # TODO Errors if there's only 1 picture
         # Next button
         def nextPageFunction():
             nonlocal _pageNumber
             if _pageNumber >= (_totalPages - 1):
-                return  # Page is the last
+                self.Confirmation()
+                return
             _pageNumber += 1
             imageLabel["image"] = dictOfReceiptImages[_pageNumber]
             self.receiptsInformation[self.listOfReceiptPaths[_pageNumber]] = {
-                "date": self.convertStrDateToDate(datesListbox.curselection()),
+                "date": self.receiptDates[datesListbox.curselection()[0]],
                 "receiptTotal": int(receiptTotalEntry.get()),
                 "mealType": mealTypeVar.get(),
             }
 
-        nextButton = ttk.Button(Receipts, text="Next", command=nextPageFunction)
+        nextButton = ttk.Button(ReceiptsFrame, text="Next", command=nextPageFunction)
 
         # Previous button
         def previousPageFunction():
@@ -159,13 +161,13 @@ class App:
             imageLabel["image"] = dictOfReceiptImages[_pageNumber]
 
         previousButton = ttk.Button(
-            Receipts, text="Previous", command=previousPageFunction
+            ReceiptsFrame, text="Previous", command=previousPageFunction
         )
 
         ####
         # Grid all the widgets
         ####
-        Receipts.grid()
+        ReceiptsFrame.grid()
         imageLabel.grid(column=0, row=0, columnspan=4)
         breakfastRadioButton.grid(column=0, row=1)
         dinnerRadioButton.grid(column=1, row=1)
@@ -180,37 +182,43 @@ class App:
         ####
         # Create widgets
         ####
-        Confirmation = ttk.Frame(self.mainframe)
+        ConfirmationFrame = ttk.Frame(self.mainframe)
 
         confirmationLabel = ttk.Label(
-            Confirmation,
+            ConfirmationFrame,
             text="Confirm the entered details are correct. This will generate an expenses report along with renaming the receipt pictures to reflect their receipt total",
         )
 
         def confirmButtonFunction() -> None:
-            self.generateExpenseReport(self.receiptsInformation, self.receiptDates)
-            self.renameReceiptPictures(self.listOfReceiptPaths)
+            self.writeExpenseReport(
+                self.generateExpenseReport(self.receiptsInformation, self.receiptDates)
+            )
+            # self.renameReceiptPictures(self.listOfReceiptPaths)
             self.root.destroy()
 
         confirmButton = ttk.Button(
-            Confirmation, text="Confirm", command=confirmButtonFunction
+            ConfirmationFrame, text="Confirm", command=confirmButtonFunction
         )
 
         def goBackButtonFunction() -> None:
             self.Receipts()
 
         goBackButton = ttk.Button(
-            Confirmation, text="Go back", command=goBackButtonFunction
+            ConfirmationFrame, text="Go back", command=goBackButtonFunction
         )
 
         ####
         # Grid all the widgets
         ####
+        ConfirmationFrame.grid()
+        confirmationLabel.grid(row=0, column=0, columnspan=2)
+        goBackButton.grid(row=1, column=0)
+        confirmButton.grid(row=1, column=1)
 
-    @staticmethod
-    def convertStrDateToDate(dateString) -> date:
-        dateParts = dateString[0].split("-")
-        return date(int(dateParts[0]), int(dateParts[1]), int(dateParts[2]))
+    # @staticmethod
+    # def convertStrDateToDate(dateString) -> date:
+    #     dateParts = dateString[0].split("-")
+    #     return date(int(dateParts[0]), int(dateParts[1]), int(dateParts[2]))
 
     @staticmethod
     def generateExpenseReport(
@@ -219,6 +227,7 @@ class App:
         finalReport: dict["date", App.FinalReportAttributes] = {
             eachDate: {} for eachDate in receiptDates
         }
+        print(receiptsInfo)
 
         for eachReceiptInfo in receiptsInfo:
             if receiptsInfo[eachReceiptInfo]["mealType"] == 0:  # Breakfast
