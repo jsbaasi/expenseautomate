@@ -142,13 +142,13 @@ class App:
             if _pageNumber >= (_totalPages - 1):
                 self.Confirmation()
                 return
-            _pageNumber += 1
-            imageLabel["image"] = dictOfReceiptImages[_pageNumber]
             self.receiptsInformation[self.listOfReceiptPaths[_pageNumber]] = {
                 "date": self.receiptDates[datesListbox.curselection()[0]],
                 "receiptTotal": int(receiptTotalEntry.get()),
                 "mealType": mealTypeVar.get(),
             }
+            _pageNumber += 1
+            imageLabel["image"] = dictOfReceiptImages[_pageNumber]
 
         nextButton = ttk.Button(ReceiptsFrame, text="Next", command=nextPageFunction)
 

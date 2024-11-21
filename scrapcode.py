@@ -26,10 +26,20 @@ from datetime import date, timedelta
 #         print(dict, dictofdict[dict], file=f)
 
 {
-    "D:\\Coding\\expensescript\\example1.png": {},
-    "D:\\Coding\\expensescript\\example2.png": {
+    "E:\\Coding\\expenseautomate\\example1.png": {},
+    "E:\\Coding\\expenseautomate\\example2.png": {
         "date": datetime.date(2024, 11, 21),
-        "receiptTotal": 44,
+        "receiptTotal": 1,
+        "mealType": 0,
+    },
+    "E:\\Coding\\expenseautomate\\example3.png": {
+        "date": datetime.date(2024, 11, 21),
+        "receiptTotal": 1,
+        "mealType": 0,
+    },
+    "E:\\Coding\\expenseautomate\\example4.png": {
+        "date": datetime.date(2024, 11, 21),
+        "receiptTotal": 1,
         "mealType": 0,
     },
 }
