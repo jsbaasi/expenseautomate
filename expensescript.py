@@ -140,6 +140,11 @@ class App:
         def nextPageFunction():
             nonlocal _pageNumber
             if _pageNumber >= (_totalPages - 1):
+                self.receiptsInformation[self.listOfReceiptPaths[_pageNumber]] = {
+                    "date": self.receiptDates[datesListbox.curselection()[0]],
+                    "receiptTotal": int(receiptTotalEntry.get()),
+                    "mealType": mealTypeVar.get(),
+                }
                 self.Confirmation()
                 return
             self.receiptsInformation[self.listOfReceiptPaths[_pageNumber]] = {
@@ -225,7 +230,8 @@ class App:
         receiptsInfo: dict[str, ReceiptsInfoAttributes], receiptDates: list["date"]
     ) -> dict["date", FinalReportAttributes]:
         finalReport: dict["date", App.FinalReportAttributes] = {
-            eachDate: {} for eachDate in receiptDates
+            eachDate: {"breakfastTotal": 0, "dinnerTotal": 0}
+            for eachDate in receiptDates
         }
         print(receiptsInfo)
 
