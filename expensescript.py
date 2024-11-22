@@ -277,9 +277,7 @@ class App:
     @staticmethod
     def getListOfReceiptPaths() -> list:  # TODO Assumes there's images in the dir
         receiptDirectory = filedialog.askdirectory()
-        print(receiptDirectory)
         fileList = os.listdir(receiptDirectory)
-        print(fileList)
         listOfReceiptPaths = []
         validFormats = [".png", ".jpg", ".jpeg"]
         for file in fileList:
