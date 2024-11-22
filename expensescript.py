@@ -1,9 +1,10 @@
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
-from PIL import Image, ImageTk
+
+# from PIL import Image, ImageTk
 import os
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from tkcalendar import Calendar
 from enum import Enum
 from typing import TypedDict
@@ -177,14 +178,27 @@ class App:
         ReceiptsFrame.grid()
         imageLabel.grid(column=0, row=0, columnspan=4)
         breakfastRadioButton.grid(column=0, row=1)
-        dinnerRadioButton.grid(column=1, row=1)
-        datesListbox.grid(column=2, row=1)
-        receiptTotalEntry.grid(column=3, row=1)
-        previousButton.grid(column=0, row=2)
-        nextButton.grid(column=3, row=2)
+        dinnerRadioButton.grid(column=0, row=2)
+        datesListbox.grid(column=2, row=1, rowspan=2)
+        receiptTotalEntry.grid(column=3, row=1, rowspan=2)
+        previousButton.grid(column=0, row=3)
+        nextButton.grid(column=3, row=3)
 
     def Confirmation(self):
         self.clearMainframe()
+        _finalReport: dict["date", App.FinalReportAttributes] = (
+            self.generateExpenseReport(self.receiptsInformation, self.receiptDates)
+        )
+        _finalReportString = ""
+        for eachDict in _finalReport:
+            _finalReportString += (
+                str(eachDict)
+                + " had a breakfast total of £"
+                + str(_finalReport[eachDict]["breakfastTotal"])
+                + " and a dinner total of £"
+                + str(_finalReport[eachDict]["dinnerTotal"])
+                + "\n"
+            )
 
         ####
         # Create widgets
@@ -196,15 +210,15 @@ class App:
             text="Confirm the entered details are correct. This will generate an expenses report along with renaming the receipt pictures to reflect their receipt total",
         )
 
-        def confirmButtonFunction() -> None:
-            self.writeExpenseReport(
-                self.generateExpenseReport(self.receiptsInformation, self.receiptDates)
-            )
+        reportPrintedLabel = ttk.Label(ConfirmationFrame, text=f"{_finalReportString}")
+
+        def writeToFileButtonFunction() -> None:
+            self.writeExpenseReport(_finalReport)
             self.renameReceiptPictures(self.receiptsInformation)
             self.root.destroy()
 
-        confirmButton = ttk.Button(
-            ConfirmationFrame, text="Confirm", command=confirmButtonFunction
+        writeToFileButton = ttk.Button(
+            ConfirmationFrame, text="Write to file", command=writeToFileButtonFunction
         )
 
         def goBackButtonFunction() -> None:
@@ -219,8 +233,9 @@ class App:
         ####
         ConfirmationFrame.grid()
         confirmationLabel.grid(row=0, column=0, columnspan=2)
-        goBackButton.grid(row=1, column=0)
-        confirmButton.grid(row=1, column=1)
+        reportPrintedLabel.grid(row=1, column=0, columnspan=2)
+        goBackButton.grid(row=2, column=0)
+        writeToFileButton.grid(row=2, column=1)
 
     @staticmethod
     def generateExpenseReport(
@@ -262,12 +277,14 @@ class App:
     @staticmethod
     def getListOfReceiptPaths() -> list:  # TODO Assumes there's images in the dir
         receiptDirectory = filedialog.askdirectory()
+        print(receiptDirectory)
         fileList = os.listdir(receiptDirectory)
+        print(fileList)
         listOfReceiptPaths = []
         validFormats = [".png", ".jpg", ".jpeg"]
         for file in fileList:
             if os.path.splitext(file)[1] in validFormats:
-                listOfReceiptPaths.append(os.path.abspath(file))
+                listOfReceiptPaths.append(receiptDirectory + "/" + file)
 
         return listOfReceiptPaths
 
