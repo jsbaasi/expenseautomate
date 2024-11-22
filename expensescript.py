@@ -8,6 +8,7 @@ from tkcalendar import Calendar
 from enum import Enum
 from typing import TypedDict
 from pathlib import Path
+import random
 
 
 class App:
@@ -17,12 +18,12 @@ class App:
 
     class ReceiptsInfoAttributes(TypedDict):
         date: "date"
-        receiptTotal: int
+        receiptTotal: float
         mealType: int
 
     class FinalReportAttributes(TypedDict):
-        breakfastTotal: int
-        dinnerTotal: int
+        breakfastTotal: float
+        dinnerTotal: float
 
     def __init__(self, root) -> None:
         self.root: "Tk" = root
@@ -143,14 +144,14 @@ class App:
             if _pageNumber >= (_totalPages - 1):
                 self.receiptsInformation[self.listOfReceiptPaths[_pageNumber]] = {
                     "date": self.receiptDates[datesListbox.curselection()[0]],
-                    "receiptTotal": int(receiptTotalEntry.get()),
+                    "receiptTotal": float(receiptTotalEntry.get()),
                     "mealType": mealTypeVar.get(),
                 }
                 self.Confirmation()
                 return
             self.receiptsInformation[self.listOfReceiptPaths[_pageNumber]] = {
                 "date": self.receiptDates[datesListbox.curselection()[0]],
-                "receiptTotal": int(receiptTotalEntry.get()),
+                "receiptTotal": float(receiptTotalEntry.get()),
                 "mealType": mealTypeVar.get(),
             }
             _pageNumber += 1
@@ -254,7 +255,7 @@ class App:
             p = Path(eachReceiptPath)
             p.rename(
                 p.with_stem(
-                    f"{receiptsInfo[eachReceiptPath]['date']}_£{receiptsInfo[eachReceiptPath]['receiptTotal']}"
+                    f"{receiptsInfo[eachReceiptPath]['date']}_£{receiptsInfo[eachReceiptPath]['receiptTotal']}_{random.randint(1000,9999)}"
                 )
             )
 
