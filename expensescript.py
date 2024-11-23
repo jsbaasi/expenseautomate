@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
+from tkinter import messagebox
 
 # from PIL import Image, ImageTk
 import os
@@ -28,8 +29,11 @@ class App:
 
     def __init__(self, root) -> None:
         self.root: "Tk" = root
+        windowIcon = PhotoImage(
+            file="E:\Coding\expenseautomate\expenseautomatelogo.png"
+        )
+        self.root.iconphoto(False, windowIcon)
         self.root.title("Expense Automate")
-
         # self.style = ttk.Style()
         # self.style.configure(
         #     "Blue.TFrame", background="blue", borderwidth=5, relief="raised"
@@ -40,6 +44,11 @@ class App:
 
         self.root.update_idletasks()  # If this isn't done, Receipts' Entry widget is not focussed lol
         self.listOfReceiptPaths = self.getListOfReceiptPaths()
+        if not (self.listOfReceiptPaths):
+            messagebox.showerror(
+                "Error", "The selected directory does not contain supported image types"
+            )
+            self.root.destroy()
         self.SelectDates()
 
     def SelectDates(self) -> None:
