@@ -30,14 +30,15 @@ class App:
     def __init__(self, root) -> None:
         self.root: "Tk" = root
         windowIcon = PhotoImage(
-            file="E:\Coding\expenseautomate\expenseautomatelogo.png"
+            file="E:\\Coding\\expenseautomate\\awthemes-10.4.0\\expenseautomatelogo.png"
         )
         self.root.iconphoto(False, windowIcon)
         self.root.title("Expense Automate")
-        # self.style = ttk.Style()
-        # self.style.configure(
-        #     "Blue.TFrame", background="blue", borderwidth=5, relief="raised"
-        # )
+        self.root.tk.call("lappend", "auto_path", "./awthemes-10.4.0")
+        self.root.tk.call("package", "require", "awdark")
+
+        self.s = ttk.Style()
+        self.s.theme_use("awdark")
 
         self.mainframe = ttk.Frame(self.root, width=600, height=600, padding=50)
         self.mainframe.grid()
@@ -129,23 +130,35 @@ class App:
         datesVar = StringVar(value=[str(x) for x in self.receiptDates])
         datesListbox = Listbox(ReceiptsFrame, listvariable=datesVar)
 
+        # Frame for radio buttons
+        ReceiptsRadioButtonFrame = ttk.Frame(ReceiptsFrame)
+
         # Radio button for meal type
         mealTypeVar = IntVar()
         breakfastRadioButton = ttk.Radiobutton(
-            ReceiptsFrame,
+            ReceiptsRadioButtonFrame,
             text="Breakfast",
             variable=mealTypeVar,
             value=App.MealType.BREAKFAST.value,
         )
         dinnerRadioButton = ttk.Radiobutton(
-            ReceiptsFrame,
+            ReceiptsRadioButtonFrame,
             text="Dinner",
             variable=mealTypeVar,
             value=App.MealType.DINNER.value,
         )
+
+        # Frame for entry
+        ReceiptsEntryFrame = ttk.Frame(ReceiptsFrame)
+
+        # Label for text above entry
+        receiptEntryLabel = ttk.Label(
+            ReceiptsEntryFrame, text="Please enter receipt total from above picture"
+        )
+
         # Entry for receipt total
         receiptTotalVar = StringVar()
-        receiptTotalEntry = ttk.Entry(ReceiptsFrame, textvariable=receiptTotalVar)
+        receiptTotalEntry = ttk.Entry(ReceiptsEntryFrame, textvariable=receiptTotalVar)
 
         # TODO Errors if there's only 1 picture
         # Next button
@@ -185,13 +198,20 @@ class App:
         # Grid all the widgets
         ####
         ReceiptsFrame.grid()
-        imageLabel.grid(column=0, row=0, columnspan=4)
-        breakfastRadioButton.grid(column=0, row=1)
-        dinnerRadioButton.grid(column=0, row=2)
-        datesListbox.grid(column=2, row=1, rowspan=2)
-        receiptTotalEntry.grid(column=3, row=1, rowspan=2)
-        previousButton.grid(column=0, row=3)
-        nextButton.grid(column=3, row=3)
+        imageLabel.grid(column=0, row=0, columnspan=3)
+
+        ReceiptsRadioButtonFrame.grid(column=0, row=1)
+        breakfastRadioButton.grid(column=0, row=0)
+        dinnerRadioButton.grid(column=0, row=1)
+
+        datesListbox.grid(column=1, row=1)
+
+        ReceiptsEntryFrame.grid(column=2, row=1)
+        receiptEntryLabel.grid(column=0, row=0)
+        receiptTotalEntry.grid(column=0, row=1)
+
+        previousButton.grid(column=0, row=2)
+        nextButton.grid(column=2, row=2)
 
     def Confirmation(self):
         self.clearMainframe()
