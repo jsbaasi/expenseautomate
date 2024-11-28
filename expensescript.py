@@ -40,8 +40,10 @@ class App:
         self.s = ttk.Style()
         self.s.theme_use("awdark")
 
-        self.mainframe = ttk.Frame(self.root, width=600, height=600, padding=50)
+        self.mainframe = ttk.Frame(self.root, width=800, height=1000, padding=50)
         self.mainframe.grid()
+        self.mainframe.grid_propagate(False)
+        self.mainframe.grid_anchor("center")
 
         self.root.update_idletasks()  # If this isn't done, Receipts' Entry widget is not focussed lol
         self.listOfReceiptPaths = self.getListOfReceiptPaths()
@@ -124,43 +126,48 @@ class App:
         dictOfReceiptImages = {}
         for index, rpath in enumerate(self.listOfReceiptPaths):
             dictOfReceiptImages[index] = PhotoImage(file=rpath)
+
         imageLabel = ttk.Label(ReceiptsFrame, image=dictOfReceiptImages[0])
+
+        DatesListboxLabelFrame = ttk.LabelFrame(
+            ReceiptsFrame, text="Choose receipt date", padding=10
+        )
 
         # Listbox for dates
         datesVar = StringVar(value=[str(x) for x in self.receiptDates])
-        datesListbox = Listbox(ReceiptsFrame, listvariable=datesVar)
+        datesListbox = Listbox(DatesListboxLabelFrame, listvariable=datesVar, height=5)
 
         # Frame for radio buttons
-        ReceiptsRadioButtonFrame = ttk.Frame(ReceiptsFrame)
+        ReceiptsRadioButtonLabelFrame = ttk.LabelFrame(
+            ReceiptsFrame, text="Choose receipt type", padding=10
+        )
 
         # Radio button for meal type
         mealTypeVar = IntVar()
         breakfastRadioButton = ttk.Radiobutton(
-            ReceiptsRadioButtonFrame,
+            ReceiptsRadioButtonLabelFrame,
             text="Breakfast",
             variable=mealTypeVar,
             value=App.MealType.BREAKFAST.value,
         )
         dinnerRadioButton = ttk.Radiobutton(
-            ReceiptsRadioButtonFrame,
+            ReceiptsRadioButtonLabelFrame,
             text="Dinner",
             variable=mealTypeVar,
             value=App.MealType.DINNER.value,
         )
 
         # Frame for entry
-        ReceiptsEntryFrame = ttk.Frame(ReceiptsFrame)
-
-        # Label for text above entry
-        receiptEntryLabel = ttk.Label(
-            ReceiptsEntryFrame, text="Please enter receipt total from above picture"
+        ReceiptsEntryLabelFrame = ttk.LabelFrame(
+            ReceiptsFrame, text="Enter receipt total", padding=10
         )
 
         # Entry for receipt total
         receiptTotalVar = StringVar()
-        receiptTotalEntry = ttk.Entry(ReceiptsEntryFrame, textvariable=receiptTotalVar)
+        receiptTotalEntry = ttk.Entry(
+            ReceiptsEntryLabelFrame, textvariable=receiptTotalVar
+        )
 
-        # TODO Errors if there's only 1 picture
         # Next button
         def nextPageFunction():
             nonlocal _pageNumber
@@ -200,14 +207,14 @@ class App:
         ReceiptsFrame.grid()
         imageLabel.grid(column=0, row=0, columnspan=3)
 
-        ReceiptsRadioButtonFrame.grid(column=0, row=1)
-        breakfastRadioButton.grid(column=0, row=0)
-        dinnerRadioButton.grid(column=0, row=1)
+        ReceiptsRadioButtonLabelFrame.grid(column=0, row=1)
+        breakfastRadioButton.grid()
+        dinnerRadioButton.grid()
 
-        datesListbox.grid(column=1, row=1)
+        DatesListboxLabelFrame.grid(column=1, row=1)
+        datesListbox.grid()
 
-        ReceiptsEntryFrame.grid(column=2, row=1)
-        receiptEntryLabel.grid(column=0, row=0)
+        ReceiptsEntryLabelFrame.grid(column=2, row=1)
         receiptTotalEntry.grid(column=0, row=1)
 
         previousButton.grid(column=0, row=2)
