@@ -3,7 +3,7 @@ from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
 
-# from PIL import Image, ImageTk
+from PIL import Image, ImageTk
 import os
 from datetime import date, timedelta
 from tkcalendar import Calendar
@@ -40,7 +40,7 @@ class App:
         self.s = ttk.Style()
         self.s.theme_use("awdark")
 
-        self.mainframe = ttk.Frame(self.root, width=800, height=1000, padding=50)
+        self.mainframe = ttk.Frame(self.root, width=800, height=800, padding=50)
         self.mainframe.grid()
         self.mainframe.grid_propagate(False)
         self.mainframe.grid_anchor("center")
@@ -125,7 +125,9 @@ class App:
         # List of images and a single label to display all of them
         dictOfReceiptImages = {}
         for index, rpath in enumerate(self.listOfReceiptPaths):
-            dictOfReceiptImages[index] = PhotoImage(file=rpath)
+            dictOfReceiptImages[index] = ImageTk.PhotoImage(
+                Image.open(fp=rpath).resize((600, 600))
+            )
 
         imageLabel = ttk.Label(ReceiptsFrame, image=dictOfReceiptImages[0])
 
