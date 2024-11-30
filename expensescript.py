@@ -10,7 +10,6 @@ from tkcalendar import Calendar
 from enum import Enum
 from typing import TypedDict
 from pathlib import Path
-import random
 import json
 
 
@@ -42,7 +41,7 @@ class App:
         self.s = ttk.Style()
         self.s.theme_use("awdark")
 
-        self.mainframe = ttk.Frame(self.root, width=800, height=800, padding=50)
+        self.mainframe = ttk.Frame(self.root, width=1000, height=800, padding=50)
         self.mainframe.grid()
         self.mainframe.grid_propagate(False)
         self.mainframe.grid_anchor("center")
@@ -139,7 +138,7 @@ class App:
         ####
         # Create widgets
         ####
-        ReceiptsFrame = ttk.Frame(self.mainframe, width=600, height=600)
+        ReceiptsFrame = ttk.Frame(self.mainframe, width=600, height=600, padding=50)
 
         # List of images and a single label to display all of them
         dictOfReceiptImages = {}
@@ -240,24 +239,38 @@ class App:
             ReceiptsFrame, text="Previous", command=previousPageFunction
         )
 
+        def backToSelectDatesFunction():
+            self.SelectDates()
+
+        backToSelectDatesButton = ttk.Button(
+            ReceiptsFrame,
+            text="Select dates",
+            command=backToSelectDatesFunction,
+        )
+
+        bsLabel = ttk.Label(ReceiptsFrame, text="Input details")
+
         ####
         # Grid all the widgets
         ####
         ReceiptsFrame.grid()
-        imageLabel.grid(column=0, row=0, columnspan=3)
+        backToSelectDatesButton.grid(row=0, column=0)
+        bsLabel.grid(row=0, column=4)
 
-        ReceiptsRadioButtonLabelFrame.grid(column=0, row=1)
+        imageLabel.grid(row=1, column=1, columnspan=3)
+
+        ReceiptsRadioButtonLabelFrame.grid(row=2, column=1)
         breakfastRadioButton.grid()
         dinnerRadioButton.grid()
 
-        DatesListboxLabelFrame.grid(column=1, row=1)
+        DatesListboxLabelFrame.grid(row=2, column=2)
         datesListbox.grid()
 
-        ReceiptsEntryLabelFrame.grid(column=2, row=1)
+        ReceiptsEntryLabelFrame.grid(column=3, row=2)
         receiptTotalEntry.grid(column=0, row=1)
 
-        previousButton.grid(column=0, row=2)
-        nextButton.grid(column=2, row=2)
+        previousButton.grid(column=1, row=3)
+        nextButton.grid(column=3, row=3)
 
     def Confirmation(self):
         self.clearMainframe()
