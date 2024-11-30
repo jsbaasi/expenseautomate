@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
-
+import traceback
 from PIL import Image, ImageTk
 import os
 from datetime import date, timedelta
@@ -11,6 +11,7 @@ from enum import Enum
 from typing import TypedDict
 from pathlib import Path
 import random
+import json
 
 
 class App:
@@ -36,6 +37,7 @@ class App:
         self.root.title("Expense Automate")
         self.root.tk.call("lappend", "auto_path", "./awthemes-10.4.0")
         self.root.tk.call("package", "require", "awdark")
+        self.root.report_callback_exception = self.report_callback_exception
 
         self.s = ttk.Style()
         self.s.theme_use("awdark")
@@ -139,7 +141,7 @@ class App:
         datesVar = StringVar(value=[str(x) for x in self.receiptDates])
         datesListbox = Listbox(DatesListboxLabelFrame, listvariable=datesVar, height=5)
 
-        # Frame for radio buttons
+        # Label Frame for radio buttons
         ReceiptsRadioButtonLabelFrame = ttk.LabelFrame(
             ReceiptsFrame, text="Choose receipt type", padding=10
         )
@@ -159,7 +161,7 @@ class App:
             value=App.MealType.DINNER.value,
         )
 
-        # Frame for entry
+        # Label Frame for entry
         ReceiptsEntryLabelFrame = ttk.LabelFrame(
             ReceiptsFrame, text="Enter receipt total", padding=10
         )
@@ -173,6 +175,24 @@ class App:
         # Next button
         def nextPageFunction():
             nonlocal _pageNumber
+            try:
+                datesListbox.curselection()[0]
+            except IndexError:
+                messagebox.showerror(
+                    title="Expense Automate", message="Please select a date"
+                )
+                return
+
+            try:
+                assert float(receiptTotalEntry.get())
+                assert float(receiptTotalEntry.get()) != 0
+            except (ValueError, AssertionError):
+                messagebox.showerror(
+                    title="Expense Automate",
+                    message="Please enter a valid receipt total",
+                )
+                return
+
             if _pageNumber >= (_totalPages - 1):
                 self.receiptsInformation[self.listOfReceiptPaths[_pageNumber]] = {
                     "date": self.receiptDates[datesListbox.curselection()[0]],
@@ -278,19 +298,23 @@ class App:
     @staticmethod
     def generateExpenseReport(
         receiptsInfo: dict[str, ReceiptsInfoAttributes], receiptDates: list["date"]
-    ) -> dict["date", FinalReportAttributes]:
-        finalReport: dict["date", App.FinalReportAttributes] = {
-            eachDate: {"breakfastTotal": 0, "dinnerTotal": 0}
+    ) -> dict[str, FinalReportAttributes]:
+
+        finalReport: dict[str, App.FinalReportAttributes] = {
+            App.getStrDate(eachDate): {
+                "breakfastTotal": 0,
+                "dinnerTotal": 0,
+            }
             for eachDate in receiptDates
         }
 
         for eachReceiptInfo in receiptsInfo:
             if receiptsInfo[eachReceiptInfo]["mealType"] == 0:  # Breakfast
-                finalReport[receiptsInfo[eachReceiptInfo]["date"]][
+                finalReport[App.getStrDate(receiptsInfo[eachReceiptInfo]["date"])][
                     "breakfastTotal"
                 ] += receiptsInfo[eachReceiptInfo]["receiptTotal"]
             else:  # Dinner
-                finalReport[receiptsInfo[eachReceiptInfo]["date"]][
+                finalReport[App.getStrDate(receiptsInfo[eachReceiptInfo]["date"])][
                     "dinnerTotal"
                 ] += receiptsInfo[eachReceiptInfo]["receiptTotal"]
 
@@ -298,9 +322,8 @@ class App:
 
     @staticmethod
     def writeExpenseReport(finalReport: dict["date", FinalReportAttributes]) -> None:
-        with open("report.txt", "w") as f:
-            for eachDict in finalReport:
-                print(f"{eachDict}, {finalReport[eachDict]}", file=f)
+        with open("report.json", "w") as f:
+            print(json.dumps(finalReport, indent=4), file=f)
 
     @staticmethod
     def renameReceiptPictures(receiptsInfo: dict[str, ReceiptsInfoAttributes]) -> None:
@@ -323,6 +346,14 @@ class App:
                 listOfReceiptPaths.append(receiptDirectory + "/" + file)
 
         return listOfReceiptPaths
+
+    @staticmethod
+    def getStrDate(eachDate: "date") -> str:
+        return f"{eachDate.day}/{eachDate.month}/{eachDate.year}"
+
+    def report_callback_exception(self, *args):
+        error = traceback.format_exception(*args)
+        messagebox.showerror("Exception", error)
 
     def clearMainframe(self) -> None:
         for c in self.mainframe.winfo_children():
