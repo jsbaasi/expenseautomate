@@ -3,3 +3,7 @@
 then:
 <br>-it prints out a report to report.json 
 <br>-renames the receipt pictures to reflect their receipt totals and their dates</p>
+
+<p>
+  Find releases (.exe binaries) for your platform on the right to skip running the code/downloading libraries yourself.
+</p>
