@@ -327,13 +327,15 @@ class App:
 
     @staticmethod
     def renameReceiptPictures(receiptsInfo: dict[str, ReceiptsInfoAttributes]) -> None:
+        counter = 1
         for eachReceiptPath in receiptsInfo:
             p = Path(eachReceiptPath)
             p.rename(
                 p.with_stem(
-                    f"{receiptsInfo[eachReceiptPath]['date']}_£{receiptsInfo[eachReceiptPath]['receiptTotal']}_{random.randint(1000,9999)}"
+                    f"{receiptsInfo[eachReceiptPath]['date']}_£{receiptsInfo[eachReceiptPath]['receiptTotal']:.2f}_{counter:04}"
                 )
             )
+            counter += 1
 
     @staticmethod
     def getListOfReceiptPaths() -> list:  # TODO Assumes there's images in the dir
