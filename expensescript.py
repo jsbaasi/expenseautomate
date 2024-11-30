@@ -80,12 +80,21 @@ class App:
         expenseLabel = ttk.Label(SelectDates, textvariable=expenseLabelText)
         calenderStartFinishDates: list["date"] = []
 
-        def calenderNextSelectionFunction():
+        def calenderNextButtonFunction():
             if len(calenderStartFinishDates) == 0:
                 calenderStartFinishDates.append(calender.selection_get())
                 expenseLabelText.set("Pick the final date of expenses")
 
             elif len(calenderStartFinishDates) == 1:
+                if (
+                    calender.selection_get() < calenderStartFinishDates[0]
+                ):  # Second date is not valid
+                    messagebox.showerror(
+                        title="Expense Automate",
+                        message=f"Please select a second date that proceeds {App.getStrDate(calenderStartFinishDates[0])}",
+                    )
+                    return
+
                 calenderStartFinishDates.append(calender.selection_get())
                 self.receiptDates = [
                     calenderStartFinishDates[0] + timedelta(days=x)
@@ -99,17 +108,25 @@ class App:
                 ]
                 self.Receipts()
 
-        calenderNextSelection = ttk.Button(
-            SelectDates, text="Next", command=calenderNextSelectionFunction
+        calenderNextButton = ttk.Button(
+            SelectDates, text="Next", command=calenderNextButtonFunction
+        )
+
+        def calenderBackButtonFunction():
+            self.SelectDates()
+
+        calenderBackButton = ttk.Button(
+            SelectDates, text="Back", command=calenderBackButtonFunction
         )
 
         ####
         # Grid all the widgets
         ####
         SelectDates.grid()
-        calender.grid()
-        expenseLabel.grid()
-        calenderNextSelection.grid()
+        calender.grid(row=0, column=0, columnspan=2)
+        expenseLabel.grid(row=1, column=0, columnspan=2)
+        calenderBackButton.grid(row=2, column=0)
+        calenderNextButton.grid(row=2, column=1)
 
     def Receipts(self):
         self.clearMainframe()
