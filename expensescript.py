@@ -113,6 +113,7 @@ class App:
 
         def calenderBackButtonFunction():
             self.SelectDates()
+            return
 
         calenderBackButton = ttk.Button(
             SelectDates, text="Back", command=calenderBackButtonFunction
@@ -231,6 +232,7 @@ class App:
         def previousPageFunction():
             nonlocal _pageNumber
             if _pageNumber <= 0:
+                self.SelectDates()
                 return  # page is the first
             _pageNumber -= 1
             imageLabel["image"] = dictOfReceiptImages[_pageNumber]
@@ -239,38 +241,25 @@ class App:
             ReceiptsFrame, text="Previous", command=previousPageFunction
         )
 
-        def backToSelectDatesFunction():
-            self.SelectDates()
-
-        backToSelectDatesButton = ttk.Button(
-            ReceiptsFrame,
-            text="Select dates",
-            command=backToSelectDatesFunction,
-        )
-
-        bsLabel = ttk.Label(ReceiptsFrame, text="Input details")
-
         ####
         # Grid all the widgets
         ####
         ReceiptsFrame.grid()
-        backToSelectDatesButton.grid(row=0, column=0)
-        bsLabel.grid(row=0, column=4)
 
-        imageLabel.grid(row=1, column=1, columnspan=3)
+        imageLabel.grid(row=0, column=0, columnspan=3)
 
-        ReceiptsRadioButtonLabelFrame.grid(row=2, column=1)
+        ReceiptsRadioButtonLabelFrame.grid(row=1, column=0)
         breakfastRadioButton.grid()
         dinnerRadioButton.grid()
 
-        DatesListboxLabelFrame.grid(row=2, column=2)
+        DatesListboxLabelFrame.grid(row=1, column=1)
         datesListbox.grid()
 
-        ReceiptsEntryLabelFrame.grid(column=3, row=2)
-        receiptTotalEntry.grid(column=0, row=1)
+        ReceiptsEntryLabelFrame.grid(row=1, column=2)
+        receiptTotalEntry.grid(row=1, column=0)
 
-        previousButton.grid(column=1, row=3)
-        nextButton.grid(column=3, row=3)
+        previousButton.grid(row=2, column=0)
+        nextButton.grid(row=2, column=2)
 
     def Confirmation(self):
         self.clearMainframe()
